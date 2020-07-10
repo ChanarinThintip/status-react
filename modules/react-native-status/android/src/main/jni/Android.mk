@@ -1,0 +1,24 @@
+LOCAL_PATH := $(call my-dir)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := nim_status
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)
+LOCAL_SRC_FILES := libnim_status.a
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := status
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)
+LOCAL_SRC_FILES := libstatus.so
+include $(PREBUILT_SHARED_LIBRARY)
+ 
+include $(CLEAR_VARS)
+LOCAL_MODULE := status_wrapper
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)
+LOCAL_STATIC_LIBRARIES := nim_status
+LOCAL_SHARED_LIBRARIES := status
+LOCAL_SRC_FILES := status.c 
+include $(BUILD_SHARED_LIBRARY)
+
+
+

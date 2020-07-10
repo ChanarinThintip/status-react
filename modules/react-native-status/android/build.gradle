@@ -24,6 +24,15 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        ndk {
+            abiFilters "x86"
+        }
+    }
+
+    externalNativeBuild {
+        ndkBuild {
+            path "src/main/jni/Android.mk"
+        }
     }
 }
 
@@ -31,5 +40,4 @@ dependencies {
     implementation 'com.facebook.react:react-native:+' // from node_modules
     implementation 'com.github.status-im:function:0.0.1'
     implementation 'androidx.appcompat:appcompat:1.0.0'
-    implementation(group: 'status-im', name: 'status-go', version: getStatusGoSHA1(), ext: 'aar')
 }

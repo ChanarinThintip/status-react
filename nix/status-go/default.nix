@@ -34,9 +34,21 @@ let
   goBuildFlags = [ "-v" ];
 
 in rec {
+  shared = callPackage ./shared {
+    inherit meta source;
+  };
+
   mobile = callPackage ./mobile {
     inherit meta source goBuildFlags goBuildLdFlags;
   };
+
+  nim-status-clone = callPackage ./nim-status/clone.nix {
+  };
+
+  nim-status = callPackage ./nim-status {
+    inherit meta source nim-status-clone shared;
+  };
+
 
   shell = mkShell {
     inputsFrom = [ mobile.android mobile.ios ];
