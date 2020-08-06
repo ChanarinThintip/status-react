@@ -11,7 +11,8 @@
 (defn- normal-mode-settings-data [{:keys [network-name
                                           current-log-level
                                           waku-bloom-filter-mode
-                                          current-fleet]}]
+                                          current-fleet
+                                          webview-debug]}]
   [{:size                 :small
     :title                (i18n/label :t/network)
     :accessibility-label  :network-button
@@ -63,6 +64,15 @@
       #(re-frame/dispatch [:navigate-to :notifications-advanced-settings])
       :chevron             true})
    {:size                   :small
+    :title                   "Webview debug"
+    :accessibility-label     :webview-debug-switch
+    :container-margin-bottom 8
+    :on-press
+    #(re-frame/dispatch
+      [:multiaccounts.ui/switch-webview-debug (not webview-debug)])
+    :accessory               :switch
+    :active                  webview-debug}
+   {:size                    :small
     :title                   (i18n/label :t/waku-bloom-filter-mode)
     :accessibility-label     :waku-bloom-filter-mode-settings-switch
     :container-margin-bottom 8
@@ -71,7 +81,7 @@
       [:multiaccounts.ui/waku-bloom-filter-mode-switched (not waku-bloom-filter-mode)])
     :accessory               :switch
     :active                  waku-bloom-filter-mode}
-   #_{:size                   :small
+   #_{:size                    :small
       :title                   :t/dev-mode
       :accessibility-label     :dev-mode-settings-switch
       :container-margin-bottom 8
