@@ -129,7 +129,7 @@
     [quo/list-item props]))
 
 (views/defview advanced-settings []
-  (views/letsubs [{:keys [chaos-mode?]} [:multiaccount]
+  (views/letsubs [{:keys [chaos-mode? webview-debug]} [:multiaccount]
                   network-name             [:network-name]
                   waku-bloom-filter-mode   [:waku/bloom-filter-mode]
                   current-log-level        [:log-level/current-log-level]
@@ -143,6 +143,7 @@
                     :current-fleet          current-fleet
                     :dev-mode?              false
                     :waku-bloom-filter-mode waku-bloom-filter-mode
+                    :webview-debug          webview-debug
                     :chaos-mode?            chaos-mode?})
        :key-fn    (fn [_ i] (str i))
        :render-fn render-item}]]))
