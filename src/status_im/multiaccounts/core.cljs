@@ -103,6 +103,7 @@
              :preview-privacy? (boolean private?)
              {})))
 
+
 (fx/defn switch-preview-privacy-mode-flag
   [{:keys [db]}]
   (let [private? (get-in db [:multiaccount :preview-privacy?])]
