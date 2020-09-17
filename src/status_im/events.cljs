@@ -1253,3 +1253,8 @@
                 :chat (chat.loading/load-messages %)
                 :multiaccounts (keycard/multiaccounts-screen-did-load %)
                 nil))))
+
+(handlers/register-handler-fx
+ :multiaccounts.ui/set-link-preview
+ (fn [cofx [_ site enabled?]]
+   (multiaccounts/set-link-preview cofx site enabled?)))

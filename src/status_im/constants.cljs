@@ -116,13 +116,15 @@
                [id network])
              default-networks)))
 
+
 (def default-multiaccount
   {:preview-privacy? config/blank-preview?
    :wallet/visible-tokens {:mainnet #{:SNT}}
    :currency :usd
    :appearance 0
    :waku-enabled true
-   :log-level config/log-level})
+   :log-level config/log-level
+   })
 
 (defn default-visible-tokens [chain]
   (get-in default-multiaccount [:wallet/visible-tokens chain]))

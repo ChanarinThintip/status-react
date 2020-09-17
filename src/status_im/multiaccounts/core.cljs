@@ -103,11 +103,33 @@
              :preview-privacy? (boolean private?)
              {})))
 
+(fx/defn set-link-preview
+  [{{:keys [multiaccount]} :db :as cofx} site enabled?]
+  (fx/merge cofx
+            (multiaccounts.update/multiaccount-update
+             :link-previews-enabled
+             (if enabled?
+               (conj (:link-previews-enabled multiaccount) site)
+               (disj (:link-previews-enabled multiaccount) site))
+             {})))
 
 (fx/defn switch-preview-privacy-mode-flag
   [{:keys [db]}]
   (let [private? (get-in db [:multiaccount :preview-privacy?])]
     {::blank-preview-flag-changed private?}))
+
+(def default-links-whitelist
+  {:youtube {:title "YouTube" :url "https://youtube.com"}
+   :twitter {:title "Twitter" :url "https://twitter.com"}
+   :github  {:title "GitHub"  :url "https://github.com"}})
+
+(fx/defn init-link-previews-settings
+[{{:keys [multiaccount]} :db :as cofx}]
+(fx/merge cofx
+          (multiaccounts.update/multiaccount-update
+            :link-previews-whitelist default-links-whitelist {})
+          (multiaccounts.update/multiaccount-update
+           :link-previews-enabled #{} {})))
 
 (re-frame/reg-fx
  ::switch-theme

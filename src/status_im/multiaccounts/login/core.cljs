@@ -204,7 +204,8 @@
               (mobile-network/on-network-status-change)
               (get-group-chat-invitations)
               (logging/set-log-level (:log-level multiaccount))
-              (multiaccounts/switch-preview-privacy-mode-flag))))
+              (multiaccounts/switch-preview-privacy-mode-flag)
+              (multiaccounts/init-link-previews-settings))))
 
 (defn get-new-auth-method [auth-method save-password?]
   (when save-password?
