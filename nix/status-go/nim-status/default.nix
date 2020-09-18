@@ -1,38 +1,37 @@
-{ callPackage
-, meta, source, shared, nim-status-clone }:
+{ callPackage, meta, source, shared }:
 
 {
-  android = 
-  {
+  android = {
     x86 = callPackage ./build.nix {
-      inherit meta source nim-status-clone shared;
+      inherit meta source shared;
       platform = "android";
       arch = "386";
     };
     armeabi = callPackage ./build.nix {
-      inherit meta source nim-status-clone shared;
+      inherit meta source shared;
       platform = "androideabi";
       arch = "arm";
     };
     arm64 = callPackage ./build.nix {
-      inherit meta source nim-status-clone shared;
+      inherit meta source shared;
       platform = "android";
       arch = "arm64";
     };
   };
+
   ios = {
     x86 = callPackage ./build.nix {
-      inherit meta source nim-status-clone shared;
+      inherit meta source shared;
       platform = "ios";
       arch = "386";
     };
     armeabi = callPackage ./build.nix {
-      inherit meta source nim-status-clone shared;
+      inherit meta source shared;
       platform = "ios";
       arch = "arm";
     };
     arm64 = callPackage ./build.nix {
-      inherit meta source nim-status-clone shared;
+      inherit meta source shared;
       platform = "ios";
       arch = "arm64";
     };

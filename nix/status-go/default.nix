@@ -42,13 +42,9 @@ in rec {
     inherit meta source goBuildFlags goBuildLdFlags;
   };
 
-  nim-status-clone = callPackage ./nim-status/clone.nix {
-  };
-
   nim-status = callPackage ./nim-status {
-    inherit meta source nim-status-clone shared;
+    inherit meta source shared;
   };
-
 
   shell = mkShell {
     inputsFrom = [ mobile.android mobile.ios ];
