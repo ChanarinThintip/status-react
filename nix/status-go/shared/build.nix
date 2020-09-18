@@ -1,5 +1,6 @@
 { stdenv, lib, fetchFromGitHub, buildGoPackage
 # Dependencies
+, xcodeWrapper
 , go, androidPkgs
 # metadata and status-go source
 , meta, source
@@ -29,48 +30,91 @@ let
   targetArch = getAttr arch targetArchMap;
   ldArch = getAttr arch ldArchMap;
 
+  osId = builtins.elemAt (builtins.split "\-" stdenv.hostPlatform.system) 2;
+  osArch = builtins.elemAt (builtins.split "\-" stdenv.hostPlatform.system) 0;
+
+  ANDROID_HOME = androidPkgs;
+  ANDROID_NDK_HOME = "${androidPkgs}/ndk-bundle";
+
+
+  androidTarget = targetArch + "-linux-" + platform;
+
+  iosSdk = if arch == "386" then "iphonesimulator" else "iphoneos";
+  iosArch = if arch == "386" then "x86_64" else "arm64";
+
+  compilerFlags = if platform == "android" || platform == "androideabi" then
+  "\"-isysroot ${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/${osId}-${osArch}/sysroot -target ${androidTarget}${api}\""
+  else
+  "\"-isysroot $(xcrun --sdk ${iosSdk} --show-sdk-path) -miphonesimulator-version-min=7.0 -fembed-bitcode -arch ${iosArch}\"";
+
+  linkerFlags = if platform == "android" || platform == "androideabi" then
+  "\"--sysroot ${ANDROID_NDK_HOME}/platforms/android-${api}/arch-${ldArch} -target ${androidTarget} -v -Wl,-soname,libstatus.so\""
+  else
+  "\"-isysroot $(xcrun --sdk ${iosSdk} --show-sdk-path) -miphonesimulator-version-min=7.0 -fembed-bitcode -arch ${iosArch}\"";
+
+  buildMode = if platform == "ios" then "c-archive" else "c-shared";
+  libraryFileName = if platform == "ios" then "./libstatus.a" else "./libstatus.so";
+
+  compilerVars = if platform == "android" || platform == "androideabi" then
+      "export PATH=${ANDROID_NDK_HOME + "/toolchains/llvm/prebuilt/${osId}-${osArch}/bin"}:$PATH "
+      else ''
+        export PATH=${xcodeWrapper}/bin:$PATH 
+        export CC=$(xcrun --sdk ${iosSdk} --find clang) 
+        export CXX=$(xcrun --sdk ${iosSdk} --find clang++)
+        '';
+  goOs = if platform == "android" || platform == "androideabi" then
+    "android"
+    else "darwin";
+
+  goArch = if platform == "android" || platform == "androideabi" then
+    if arch == "386" then "386" else "arm64"
+    else
+      if arch == "386" then "amd64" else "arm64";
+
+  goTags = if platform == "android" || platform == "androideabi" then
+  ""
+  else " -tags ios ";
+
 in buildGoPackage rec {
   pname = source.repo;
   version = "${source.cleanVersion}-${source.shortRev}-${platform}-${arch}";
 
-  inherit meta;
-  inherit (source) src goPackagePath;
+  inherit meta xcodeWrapper compilerVars
+  goOs goArch goTags targetArch platform ldArch buildMode libraryFileName;
+  inherit (source) src goPackagePath ;
 
   nativeBuildInputs = [ go ];
-
-  ANDROID_HOME = androidPkgs;
-  ANDROID_NDK_HOME = "${androidPkgs}/ndk-bundle";
 
   preBuildPhase = ''
     cd go/src/${goPackagePath}
     mkdir -p ./statusgo-lib
     go run cmd/library/*.go > ./statusgo-lib/main.go
+
+    ${compilerVars} 
   '';
 
   buildPhase = ''
     runHook preBuildPhase
     echo "Building shared library..."
 
-    # This can be done with stdenv.hostPlatform.system
-    SYS_ARCH=$(echo $system | tr '-' '\n' | head -n1)
-    SYS_NAME=$(echo $system | tr '-' '\n' | tail -n1)
-    HOST_OS="$SYS_NAME-$SYS_ARCH"
-
-    export GOOS=android GOARCH=${arch} API=${api}
+    export GOOS=${goOs} GOARCH=${goArch} API=${api}
     export TARGET=${targetArch}-linux-${platform}
 
-    export ANDROID_LLVM_PREBUILT="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt"
-    export CC=$ANDROID_LLVM_PREBUILT/$HOST_OS/bin/clang
+    #export CC=$ANDROID_LLVM_PREBUILT/$HOST_OS/bin/clang
 
     #export LIBRARY_PATH=$ANDROID_NDK_HOME/platforms/android-$API/arch-${ldArch}/usr/lib
-    export CGO_CFLAGS="-isysroot $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$HOST_OS/sysroot -target $TARGET$API"
-    export CGO_LDFLAGS="--sysroot $ANDROID_NDK_HOME/platforms/android-$API/arch-${ldArch} -target $TARGET -v -Wl,-soname,libstatus.so"
+    export CGO_CFLAGS=${compilerFlags}
+    export CGO_LDFLAGS=${linkerFlags}
     export CGO_ENABLED=1
 
     echo "Building for target: $TARGET"
+
+    ${compilerVars} 
+    
     go build \
-      -buildmode=c-shared \
-      -o ./libstatus.so \
+      -buildmode=${buildMode} \
+      ${goTags} \
+      -o ${libraryFileName} \
       $BUILD_FLAGS \
       ./statusgo-lib
 
@@ -78,9 +122,9 @@ in buildGoPackage rec {
     ls -la ./libstatus.*
   '';
 
-  fixupPhase = ''
-    find $out -type f -exec ${removeExpr removeReferences} '{}' + || true
-  '';
+   fixupPhase = ''
+     find $out -type f -exec ${removeExpr removeReferences} '{}' + || true
+   '';
 
   installPhase = ''
     mkdir -p $out
