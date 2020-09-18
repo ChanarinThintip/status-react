@@ -1,39 +1,17 @@
-{ callPackage, meta, source, shared }:
+{ newScope, meta, source, shared }:
 
-{
+let
+  callPackage = newScope { inherit meta source shared; };
+in {
   android = {
-    x86 = callPackage ./build.nix {
-      inherit meta source shared;
-      platform = "android";
-      arch = "386";
-    };
-    armeabi = callPackage ./build.nix {
-      inherit meta source shared;
-      platform = "androideabi";
-      arch = "arm";
-    };
-    arm64 = callPackage ./build.nix {
-      inherit meta source shared;
-      platform = "android";
-      arch = "arm64";
-    };
+    x86 = callPackage ./build.nix { platform = "android"; arch = "386"; };
+    armeabi = callPackage ./build.nix { platform = "androideabi"; arch = "arm"; };
+    arm64 = callPackage ./build.nix { platform = "android"; arch = "arm64"; };
   };
 
   ios = {
-    x86 = callPackage ./build.nix {
-      inherit meta source shared;
-      platform = "ios";
-      arch = "386";
-    };
-    armeabi = callPackage ./build.nix {
-      inherit meta source shared;
-      platform = "ios";
-      arch = "arm";
-    };
-    arm64 = callPackage ./build.nix {
-      inherit meta source shared;
-      platform = "ios";
-      arch = "arm64";
-    };
+    x86 = callPackage ./build.nix { platform = "ios"; arch = "386"; };
+    armeabi = callPackage ./build.nix { platform = "ios"; arch = "arm"; };
+    arm64 = callPackage ./build.nix { platform = "ios"; arch = "arm64"; };
   };
 }
