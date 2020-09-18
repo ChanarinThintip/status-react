@@ -552,6 +552,12 @@
          (string/blank? (security/safe-unmask-data seed))
          false))))
 
+(re-frame/reg-sub
+ :multiaccount/link-previews-whitelist-urls
+ :<- [:multiaccount]
+ (fn [{:keys [link-previews-whitelist]}]
+   (reduce (fn [acc [_ {:keys [url]}]] (conj acc url)) [] link-previews-whitelist)))
+
 ;;CHAT ==============================================================================================================
 
 (re-frame/reg-sub

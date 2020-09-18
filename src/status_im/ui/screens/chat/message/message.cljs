@@ -17,12 +17,16 @@
             [status-im.ui.screens.chat.message.reactions :as reactions]
             [quo.core :as quo]
             [reagent.core :as reagent]
-            [status-im.ui.screens.chat.components.reply :as components.reply])
+            [status-im.ui.screens.chat.components.reply :as components.reply]
+            [taoensso.timbre :as log]
+            [clojure.string :as string]
+            ;; ["grabity" :as grabity]
+            )
   (:require-macros [status-im.utils.views :refer [defview letsubs]]))
 
 (defview mention-element [from]
   (letsubs [contact-name [:contacts/contact-name-by-identity from]]
-    contact-name))
+           contact-name))
 
 (defn message-timestamp
   ([message]
@@ -36,24 +40,24 @@
 (defview quoted-message
   [_ {:keys [from parsed-text image]} outgoing current-public-key public?]
   (letsubs [contact-name [:contacts/contact-name-by-identity from]]
-    [react/view {:style (style/quoted-message-container outgoing)}
-     [react/view {:style style/quoted-message-author-container}
-      [chat.utils/format-reply-author
-       from
-       contact-name
-       current-public-key
-       (partial style/quoted-message-author outgoing)]]
-     (if (and image
+           [react/view {:style (style/quoted-message-container outgoing)}
+            [react/view {:style style/quoted-message-author-container}
+             [chat.utils/format-reply-author
+              from
+              contact-name
+              current-public-key
+              (partial style/quoted-message-author outgoing)]]
+            (if (and image
               ;; Disabling images for public-chats
-              (not public?))
-       [react/image {:style  {:width            56
-                              :height           56
-                              :background-color :black
-                              :border-radius    4}
-                     :source {:uri image}}]
-       [react/text {:style           (style/quoted-message-text outgoing)
-                    :number-of-lines 5}
-        (components.reply/get-quoted-text-with-mentions parsed-text)])]))
+                     (not public?))
+              [react/image {:style  {:width            56
+                                     :height           56
+                                     :background-color :black
+                                     :border-radius    4}
+                            :source {:uri image}}]
+              [react/text {:style           (style/quoted-message-text outgoing)
+                           :number-of-lines 5}
+               (components.reply/get-quoted-text-with-mentions parsed-text)])]))
 
 (defn render-inline [message-text outgoing content-type acc {:keys [type literal destination]}]
   (case type
@@ -178,7 +182,7 @@
 
 (defview message-author-name [from modal]
   (letsubs [contact-with-names [:contacts/contact-by-identity from]]
-    (chat.utils/format-author contact-with-names modal)))
+           (chat.utils/format-author contact-with-names modal)))
 
 (defn message-content-wrapper
   "Author, userpic and delivery wrapper"
@@ -236,10 +240,54 @@
      [react/view
       [render-parsed-text message (:parsed-text content)]]]]])
 
+(defn merge-paragraphs-content [parsed-text]
+  (reduce
+   (fn [acc {:keys [type children]}]
+     (if (= type "paragraph")
+       (into [] (concat acc children))
+       acc))
+   []
+   parsed-text))
+
+(defn get-links-from-paragraphs-content [merged-paragraphs]
+  (reduce
+   (fn [acc {:keys [type destination literal]}]
+     (if (= type "link")
+       (conj acc destination)
+       acc))
+   []
+   merged-paragraphs))
+
+(defn get-links [parsed-text]
+  (-> parsed-text
+      (merge-paragraphs-content)
+      (get-links-from-paragraphs-content))
+  )
+
+(defn whitelisted-link [link whitelist]
+  (let [result (some #(string/starts-with? link %) whitelist)]
+    (log/info "------------")
+    (log/info "whitelisted " link " result: " result)
+    result))
+
+(defview url-preview [links]
+  (letsubs
+   [whitelist [:multiaccount/link-previews-whitelist-urls]]
+   
+   (let [link (first (remove #(not (whitelisted-link % whitelist)) links))]
+    ;;  (-> (.grabIt grabity link)
+    ;;      (.then #(log/info "!!! grabity result: " %)))
+     
+    (when link
+      
+     [react/view {:width 200 :height 50 :background-color colors/red}]))
+  
+   ))
+
 (defmethod ->message constants/content-type-text
-  [{:keys [content outgoing current-public-key public?] :as message} {:keys [on-long-press modal]
-                                                                      :as   reaction-picker}]
+  [{:keys [content outgoing current-public-key public?] :as message} {:keys [on-long-press modal] :as reaction-picker}]
   [message-content-wrapper message
+   [react/view
    [react/touchable-highlight (when-not modal
                                 {:on-press      (fn [_]
                                                   (react/dismiss-keyboard!))
@@ -257,8 +305,15 @@
         (when (and (seq response-to) (:quoted-message message))
           [quoted-message response-to (:quoted-message message) outgoing current-public-key public?])
         [render-parsed-text-with-timestamp message (:parsed-text content)]])
-     [message-timestamp message true]]]
-   reaction-picker])
+     [message-timestamp message true]    
+     ]]
+    [url-preview (get-links (:parsed-text content))]
+    ]
+   reaction-picker]
+
+)
+
+
 
 (defmethod ->message constants/content-type-status
   [{:keys [content content-type] :as message}]

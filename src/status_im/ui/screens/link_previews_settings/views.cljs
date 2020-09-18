@@ -8,7 +8,8 @@
             [quo.core :as quo]
             [status-im.ui.components.icons.vector-icons :as icons]
             [status-im.react-native.resources :as resources]
-            [status-im.ui.components.topbar :as topbar])
+            [status-im.ui.components.topbar :as topbar]
+            [taoensso.timbre :as log])
   )
 
 (defn prepare-urls-items-data [link-previews-enabled]
