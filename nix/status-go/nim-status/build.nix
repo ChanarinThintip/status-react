@@ -120,5 +120,6 @@ in stdenv.mkDerivation rec {
     mkdir -p $out
     mv nimcache/nim_status/nim_status.h $out/
     mv libnim_status.a $out/
+    mv src/nimbase.h $out/
   '';
 }
