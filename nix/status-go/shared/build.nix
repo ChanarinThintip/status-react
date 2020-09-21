@@ -1,4 +1,4 @@
-{ stdenv, lib, fetchFromGitHub, buildGoPackage
+{ stdenv, lib, fetchFromGitHub, buildGo114Package
 # Dependencies
 , xcodeWrapper
 , go, androidPkgs
@@ -33,22 +33,18 @@ let
   osId = builtins.elemAt (builtins.split "\-" stdenv.hostPlatform.system) 2;
   osArch = builtins.elemAt (builtins.split "\-" stdenv.hostPlatform.system) 0;
 
-  ANDROID_HOME = androidPkgs;
-  ANDROID_NDK_HOME = "${androidPkgs}/ndk-bundle";
-
-
   androidTarget = targetArch + "-linux-" + platform;
 
   iosSdk = if arch == "386" then "iphonesimulator" else "iphoneos";
   iosArch = if arch == "386" then "x86_64" else "arm64";
 
   compilerFlags = if platform == "android" || platform == "androideabi" then
-  "\"-isysroot ${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/${osId}-${osArch}/sysroot -target ${androidTarget}${api}\""
+  "\"-isysroot $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/${osId}-${osArch}/sysroot -target ${androidTarget}${api}\""
   else
   "\"-isysroot $(xcrun --sdk ${iosSdk} --show-sdk-path) -miphonesimulator-version-min=7.0 -fembed-bitcode -arch ${iosArch}\"";
 
   linkerFlags = if platform == "android" || platform == "androideabi" then
-  "\"--sysroot ${ANDROID_NDK_HOME}/platforms/android-${api}/arch-${ldArch} -target ${androidTarget} -v -Wl,-soname,libstatus.so\""
+  "\"--sysroot $ANDROID_NDK_HOME/platforms/android-${api}/arch-${ldArch} -target ${androidTarget} -v -Wl,-soname,libstatus.so\""
   else
   "\"-isysroot $(xcrun --sdk ${iosSdk} --show-sdk-path) -miphonesimulator-version-min=7.0 -fembed-bitcode -arch ${iosArch}\"";
 
@@ -56,8 +52,11 @@ let
   libraryFileName = if platform == "ios" then "./libstatus.a" else "./libstatus.so";
 
   compilerVars = if platform == "android" || platform == "androideabi" then
-      "export PATH=${ANDROID_NDK_HOME + "/toolchains/llvm/prebuilt/${osId}-${osArch}/bin"}:$PATH "
-      else ''
+      ''
+        export CC=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/${osId}-${osArch}/bin/clang
+        export CXX=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/${osId}-${osArch}/bin/clang++
+        export PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/${osId}-${osArch}/bin:$PATH
+      '' else ''
         export PATH=${xcodeWrapper}/bin:$PATH 
         export CC=$(xcrun --sdk ${iosSdk} --find clang) 
         export CXX=$(xcrun --sdk ${iosSdk} --find clang++)
@@ -75,15 +74,15 @@ let
   ""
   else " -tags ios ";
 
-in buildGoPackage rec {
+in buildGo114Package rec {
   pname = source.repo;
   version = "${source.cleanVersion}-${source.shortRev}-${platform}-${arch}";
 
-  inherit meta xcodeWrapper compilerVars
-  goOs goArch goTags targetArch platform ldArch buildMode libraryFileName;
+  inherit meta compilerVars goOs goArch goTags targetArch platform ldArch buildMode libraryFileName;
   inherit (source) src goPackagePath ;
 
-  nativeBuildInputs = [ go ];
+  ANDROID_HOME = androidPkgs;
+  ANDROID_NDK_HOME = "${androidPkgs}/ndk-bundle";
 
   preBuildPhase = ''
     cd go/src/${goPackagePath}
@@ -100,8 +99,6 @@ in buildGoPackage rec {
     export GOOS=${goOs} GOARCH=${goArch} API=${api}
     export TARGET=${targetArch}-linux-${platform}
 
-    #export CC=$ANDROID_LLVM_PREBUILT/$HOST_OS/bin/clang
-
     #export LIBRARY_PATH=$ANDROID_NDK_HOME/platforms/android-$API/arch-${ldArch}/usr/lib
     export CGO_CFLAGS=${compilerFlags}
     export CGO_LDFLAGS=${linkerFlags}
@@ -110,7 +107,7 @@ in buildGoPackage rec {
     echo "Building for target: $TARGET"
 
     ${compilerVars} 
-    
+
     go build \
       -buildmode=${buildMode} \
       ${goTags} \
@@ -122,9 +119,10 @@ in buildGoPackage rec {
     ls -la ./libstatus.*
   '';
 
-   fixupPhase = ''
-     find $out -type f -exec ${removeExpr removeReferences} '{}' + || true
-   '';
+  fixupPhase = ''
+    set -x
+    find $out -type f -exec ${removeExpr removeReferences} '{}' + || true
+  '';
 
   installPhase = ''
     mkdir -p $out
