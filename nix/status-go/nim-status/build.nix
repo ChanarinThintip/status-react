@@ -78,12 +78,14 @@ let
       CC=$(xcrun --sdk ${iosSdk} --find clang) \
        CXX=$(xcrun --sdk ${iosSdk} --find clang++)");
 
+    arPath = "${ANDROID_NDK_HOME + "/toolchains/llvm/prebuilt/${osId}-${osArch}/bin/${targetArch}-linux-android-ar"}";
+    ranlibPath = "${ANDROID_NDK_HOME + "/toolchains/llvm/prebuilt/${osId}-${osArch}/bin/${targetArch}-linux-android-ranlib "}";
  
 
 in stdenv.mkDerivation rec {
   name = "nim-status"; # TODO: use pname and version
   inherit compilerFlags linkerFlags osId compilerVars 
-    nimCpu nimPlatform;
+    nimCpu nimPlatform arPath ranlibPath;
   buildInputs = with pkgs; [ git coreutils findutils gnugrep gnumake gcc nim ];
   src = fetchFromGitHub {
     owner = "status-im";
@@ -103,6 +105,9 @@ in stdenv.mkDerivation rec {
 
   buildPhase = ''
     echo "os_id: " $osId
+    export PATH=.:$PATH
+    ln -s ${arPath} ar
+    ln -s ${ranlibPath} ranlib
     ${compilerVars} \
     nim c \
       --app:staticLib \

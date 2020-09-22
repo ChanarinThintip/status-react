@@ -7,6 +7,8 @@ let
 
   android = callPackage ./android {
     status-go = status-go.mobile.android;
+    status-go-android-all = status-go.shared.android-all;
+    nim-status-android-all = status-go.nim-status.android-all;
   };
 
   ios = callPackage ./ios {
