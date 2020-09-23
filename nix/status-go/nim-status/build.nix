@@ -18,6 +18,9 @@ let
   ANDROID_HOME = androidPkgs;
   ANDROID_NDK_HOME = "${androidPkgs}/ndk-bundle";
 
+  nimIosPatch = pkgs.fetchurl { url = "https://patch-diff.githubusercontent.com/raw/nim-lang/Nim/pull/15268.patch"; sha256 = "04jg0ngqlyzwrc19rafx4s257my6bhd27myv4p78hmsyzhp36za6"; };
+  patchedNim = pkgs.nim.overrideAttrs (_: { version = "pr-15268"; patches = [ nimIosPatch ]; });
+
   targetArchMap = rec {
     "386" = "i686";
     "arm" = "arm";
@@ -42,16 +45,13 @@ let
     "arm64" = "arm64";
   };
 
-  nimCpu = if platform == "ios" && arch == "386" then ""
-  else "--cpu:${getAttr arch nimCpuMap} ";
-  nimPlatform = if platform == "ios" && arch == "386" then ""
-  else "--os:${(if platform == "ios" then "ios" else "android")} ";
+  nimCpu = if platform == "ios" && arch == "386"
+    then "--cpu:amd64" else "--cpu:${getAttr arch nimCpuMap} ";
+  nimPlatform = "--os:${(if platform == "ios" then "ios" else "android")} ";
   iosSdk = if arch == "386" then "iphonesimulator" else "iphoneos";
   iosArch = if arch == "386" then "x86_64" else "arm64";
 
-  #statusGoBuild = shared.${lib.getAttr arch ldArchMap};
-
-  compilerFlags = if platform == "ios" && arch == "386"
+  compilerFlags = if platform == "ios"
   then ""
   else "switch(\"passC\", \""  +(concatStringsSep " " 
   (if platform == "android" || platform == "androideabi"then
@@ -60,23 +60,19 @@ let
     ["-isysroot $(xcrun --sdk ${iosSdk} --show-sdk-path) -miphonesimulator-version-min=7.0 -fembed-bitcode -arch ${iosArch}"]
     )) +"\")";
 
-  linkerFlags = if platform == "ios" && arch == "386"
+  linkerFlags = if platform == "ios"
   then ""
   else "switch(\"passL\", \""  +(concatStringsSep " "   
     (if platform == "android" then
     [("--sysroot " + ANDROID_NDK_HOME + "/platforms/android-${api}/arch-${ldArch}")
     "-target ${androidTarget}"]
     else
-    ["-isysroot $(xcrun --sdk ${iosSdk} --show-sdk-path) -miphonesimulator-version-min=7.0 -fembed-bitcode -arch ${iosArch}"]
+    ["--sysroot $(xcrun --sdk ${iosSdk} --show-sdk-path) -miphonesimulator-version-min=7.0 -fembed-bitcode -arch ${iosArch}"]
     )) + "\")";
 
     compilerVars = if platform == "android" || platform == "androideabi" then
       "PATH=${ANDROID_NDK_HOME + "/toolchains/llvm/prebuilt/${osId}-${osArch}/bin"}:$PATH "
-      else
-      (if arch == "386" then ""
-      else "PATH=${xcodeWrapper}/bin:$PATH \
-      CC=$(xcrun --sdk ${iosSdk} --find clang) \
-       CXX=$(xcrun --sdk ${iosSdk} --find clang++)");
+      else "PATH=${xcodeWrapper}/bin:$PATH";
 
     arPath = "${ANDROID_NDK_HOME + "/toolchains/llvm/prebuilt/${osId}-${osArch}/bin/${targetArch}-linux-${platform}-ar"}";
     ranlibPath = "${ANDROID_NDK_HOME + "/toolchains/llvm/prebuilt/${osId}-${osArch}/bin/${targetArch}-linux-${platform}-ranlib "}";
@@ -86,7 +82,7 @@ in stdenv.mkDerivation rec {
   name = "nim-status"; # TODO: use pname and version
   inherit compilerFlags linkerFlags osId compilerVars 
     nimCpu nimPlatform arPath ranlibPath;
-  buildInputs = with pkgs; [ git coreutils findutils gnugrep gnumake gcc nim ];
+  buildInputs = with pkgs; [ git coreutils findutils gnugrep gnumake gcc patchedNim ];
   src = fetchFromGitHub {
     owner = "status-im";
     repo = "nim-status";
