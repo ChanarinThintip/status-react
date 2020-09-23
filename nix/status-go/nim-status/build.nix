@@ -20,7 +20,7 @@ let
 
   targetArchMap = rec {
     "386" = "i686";
-    "arm" = "armv7a";
+    "arm" = "arm";
     "arm64" = "aarch64";
   };
   ldArchMap = {
@@ -78,8 +78,8 @@ let
       CC=$(xcrun --sdk ${iosSdk} --find clang) \
        CXX=$(xcrun --sdk ${iosSdk} --find clang++)");
 
-    arPath = "${ANDROID_NDK_HOME + "/toolchains/llvm/prebuilt/${osId}-${osArch}/bin/${targetArch}-linux-android-ar"}";
-    ranlibPath = "${ANDROID_NDK_HOME + "/toolchains/llvm/prebuilt/${osId}-${osArch}/bin/${targetArch}-linux-android-ranlib "}";
+    arPath = "${ANDROID_NDK_HOME + "/toolchains/llvm/prebuilt/${osId}-${osArch}/bin/${targetArch}-linux-${platform}-ar"}";
+    ranlibPath = "${ANDROID_NDK_HOME + "/toolchains/llvm/prebuilt/${osId}-${osArch}/bin/${targetArch}-linux-${platform}-ranlib "}";
  
 
 in stdenv.mkDerivation rec {
@@ -111,7 +111,6 @@ in stdenv.mkDerivation rec {
     ${compilerVars} \
     nim c \
       --app:staticLib \
-      --warnings:off \
       --header \
       $nimCpu \
       $nimPlatform \

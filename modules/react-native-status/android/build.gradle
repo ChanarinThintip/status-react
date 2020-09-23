@@ -16,6 +16,11 @@ def getStatusGoSHA1 = { ->
     return object.get('commit-sha1').substring(0, 7)
 }
 
+def getEnvOrConfig = { varName ->
+    def val = System.getenv(varName) ? System.getenv(varName) : project.property(varName)
+    return val
+}
+
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
@@ -25,7 +30,7 @@ android {
         versionCode 1
         versionName "1.0"
         ndk {
-            abiFilters "x86"
+            abiFilters getEnvOrConfig('ANDROID_ABI_INCLUDE').split(";")
         }
     }
 

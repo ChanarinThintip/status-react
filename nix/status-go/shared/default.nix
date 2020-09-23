@@ -30,6 +30,7 @@ in rec {
     symlinkPhase = ''
       mkdir -p $out
       ln -s ${android.x86} $out/${getAttr "386" androidAbiMap}
+      ln -s ${android.arm} $out/${getAttr "arm" androidAbiMap}
       ln -s ${android.arm64} $out/${getAttr "arm64" androidAbiMap}
     '';
   };

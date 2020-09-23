@@ -44,7 +44,8 @@ let
   "\"-isysroot $(xcrun --sdk ${iosSdk} --show-sdk-path) -miphonesimulator-version-min=7.0 -fembed-bitcode -arch ${iosArch}\"";
 
   linkerFlags = if platform == "android" || platform == "androideabi" then
-  "\"--sysroot $ANDROID_NDK_HOME/platforms/android-${api}/arch-${ldArch} -target ${androidTarget} -v -Wl,-soname,libstatus.so\""
+  "\" --sysroot $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/${osId}-${osArch}/sysroot \
+  -target ${androidTarget}${api} -v -Wl,-soname,libstatus.so\""
   else
   "\"-isysroot $(xcrun --sdk ${iosSdk} --show-sdk-path) -miphonesimulator-version-min=7.0 -fembed-bitcode -arch ${iosArch}\"";
 
@@ -66,7 +67,8 @@ let
     else "darwin";
 
   goArch = if platform == "android" || platform == "androideabi" then
-    if arch == "386" then "386" else "arm64"
+  if arch == "386" then "386" 
+  else if platform == "androideabi" then "arm "else "arm64"
     else
       if arch == "386" then "amd64" else "arm64";
 
@@ -78,7 +80,8 @@ in buildGo114Package rec {
   pname = source.repo;
   version = "${source.cleanVersion}-${source.shortRev}-${platform}-${arch}";
 
-  inherit meta compilerVars goOs goArch goTags targetArch platform ldArch buildMode libraryFileName;
+  inherit meta compilerVars goOs goArch goTags targetArch platform ldArch buildMode 
+  compilerFlags linkerFlags libraryFileName;
   inherit (source) src goPackagePath ;
 
   ANDROID_HOME = androidPkgs;
