@@ -512,13 +512,15 @@
  :<- [:multiaccount/accounts]
  :<- [:get-screen-params :wallet-account]
  (fn [[accounts acc]]
-   (some #(when (= (:address %) (:address acc)) %) accounts)))
+   (some #(when (= (string/lower-case (:address %))
+                   (string/lower-case (:address acc))) %) accounts)))
 
 (re-frame/reg-sub
  :account-by-address
  :<- [:multiaccount/accounts]
  (fn [accounts [_ address]]
-   (some #(when (= (:address %) address) %) accounts)))
+   (some #(when (= (string/lower-case (:address %))
+                   (string/lower-case address)) %) accounts)))
 
 (re-frame/reg-sub
  :multiple-multiaccounts?
