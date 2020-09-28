@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Build;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -103,6 +104,7 @@ class StatusModule extends ReactContextBaseJavaModule implements LifecycleEventL
     @ReactMethod
     public void enableNotifications() {
         this.newMessageSignalHandler = new NewMessageSignalHandler(reactContext);
+        Statusgo.startLocalNotifications();
     }
 
     @ReactMethod
@@ -111,6 +113,7 @@ class StatusModule extends ReactContextBaseJavaModule implements LifecycleEventL
             newMessageSignalHandler.stop();
             newMessageSignalHandler = null;
         }
+        Statusgo.stopLocalNotifications();
     }
 
     private boolean checkAvailability() {
@@ -152,6 +155,18 @@ class StatusModule extends ReactContextBaseJavaModule implements LifecycleEventL
                     newMessageSignalHandler.handleNewMessageSignal(jsonEvent);
                 }
             }
+
+            if(eventType.equals("local-notifications")) {
+                Context ctx = this.getReactApplicationContext();
+                Intent intent = new Intent(ctx, LocalNotificationsService.class);
+                Bundle bundle = new Bundle();
+
+                bundle.putString("event", jsonEventString);
+                intent.putExtras(bundle);
+
+                ctx.startService(intent);
+            }
+
             WritableMap params = Arguments.createMap();
             params.putString("jsonEvent", jsonEventString);
             this.getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("gethEvent", params);
