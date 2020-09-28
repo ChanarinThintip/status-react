@@ -42,7 +42,8 @@
             status-im.ui.screens.keycard.subs
             status-im.ui.screens.keycard.settings.subs
             status-im.ui.screens.keycard.pin.subs
-            status-im.ui.screens.keycard.setup.subs))
+            status-im.ui.screens.keycard.setup.subs
+            [status-im.chat.models.mentions :as mentions]))
 
 ;; TOP LEVEL ===========================================================================================================
 
@@ -890,11 +891,12 @@
                (not (contact.db/blocked? contact)))
         (let [name (utils/safe-replace name ".stateofus.eth" "")]
           (assoc acc public-key
-                 {:alias      alias
-                  :name       (or name alias)
-                  :identicon  identicon
-                  :nickname   nickname
-                  :public-key key}))
+                 (mentions/add-searchable-phrases
+                  {:alias      alias
+                   :name       (or name alias)
+                   :identicon  identicon
+                   :nickname   nickname
+                   :public-key key})))
         acc))
     {}
     contacts)))
