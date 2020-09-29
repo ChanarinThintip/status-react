@@ -55,7 +55,7 @@ let
   (if platform == "android" || platform == "androideabi"then
     [("-isysroot " + ANDROID_NDK_HOME + "/sysroot") ("-target ${androidTarget}" + api)]
     else
-    ["-isysroot $(xcrun --sdk ${iosSdk} --show-sdk-path) -miphonesimulator-version-min=7.0 -fembed-bitcode -arch ${iosArch}"]
+    ["-isysroot $(xcrun --sdk ${iosSdk} --show-sdk-path) -fembed-bitcode -arch ${iosArch}"]
     )) +"\")";
 
   linkerFlags =  "switch(\"passL\", \""  +(concatStringsSep " "   
@@ -63,7 +63,7 @@ let
     [("--sysroot " + ANDROID_NDK_HOME + "/platforms/android-${api}/arch-${ldArch}")
     "-target ${androidTarget}"]
     else
-    ["--sysroot $(xcrun --sdk ${iosSdk} --show-sdk-path) -miphonesimulator-version-min=7.0 -fembed-bitcode -arch ${iosArch}"]
+    ["--sysroot $(xcrun --sdk ${iosSdk} --show-sdk-path) -fembed-bitcode -arch ${iosArch}"]
     )) + "\")";
 
     compilerVars = if platform == "android" || platform == "androideabi" then
