@@ -51,18 +51,14 @@ let
   iosSdk = if arch == "386" then "iphonesimulator" else "iphoneos";
   iosArch = if arch == "386" then "x86_64" else "arm64";
 
-  compilerFlags = if platform == "ios"
-  then ""
-  else "switch(\"passC\", \""  +(concatStringsSep " " 
+  compilerFlags = "switch(\"passC\", \""  +(concatStringsSep " " 
   (if platform == "android" || platform == "androideabi"then
     [("-isysroot " + ANDROID_NDK_HOME + "/sysroot") ("-target ${androidTarget}" + api)]
     else
     ["-isysroot $(xcrun --sdk ${iosSdk} --show-sdk-path) -miphonesimulator-version-min=7.0 -fembed-bitcode -arch ${iosArch}"]
     )) +"\")";
 
-  linkerFlags = if platform == "ios"
-  then ""
-  else "switch(\"passL\", \""  +(concatStringsSep " "   
+  linkerFlags =  "switch(\"passL\", \""  +(concatStringsSep " "   
     (if platform == "android" then
     [("--sysroot " + ANDROID_NDK_HOME + "/platforms/android-${api}/arch-${ldArch}")
     "-target ${androidTarget}"]
@@ -72,7 +68,9 @@ let
 
     compilerVars = if platform == "android" || platform == "androideabi" then
       "PATH=${ANDROID_NDK_HOME + "/toolchains/llvm/prebuilt/${osId}-${osArch}/bin"}:$PATH "
-      else "PATH=${xcodeWrapper}/bin:$PATH";
+      else "PATH=${xcodeWrapper}/bin:$PATH \
+            CC=$(xcrun --sdk ${iosSdk} --find clang) \
+            CXX=$(xcrun --sdk ${iosSdk} --find clang++) ";
 
     arPath = "${ANDROID_NDK_HOME + "/toolchains/llvm/prebuilt/${osId}-${osArch}/bin/${targetArch}-linux-${platform}-ar"}";
     ranlibPath = "${ANDROID_NDK_HOME + "/toolchains/llvm/prebuilt/${osId}-${osArch}/bin/${targetArch}-linux-${platform}-ranlib "}";

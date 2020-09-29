@@ -2,6 +2,7 @@
 , stdenv
 , newScope
 , lib
+, xcodeWrapper
 , meta, source }:
 let
   inherit (lib) getAttr;
@@ -34,4 +35,16 @@ in rec {
       ln -s ${android.arm64} $out/${getAttr "arm64" androidAbiMap}
     '';
   };
+
+  ios-all = stdenv.mkDerivation {
+    name = "status-go.shared.ios-all";
+    phases = [ "symlinkPhase" ];
+    inherit xcodeWrapper;
+    symlinkPhase = ''
+      mkdir -p $out
+      export PATH=${xcodeWrapper}/bin:$PATH 
+      lipo -create ${ios.x86}/libstatus.a ${ios.arm64}/libstatus.a -output $out/libstatus.a
+    '';
+  };
+
 }

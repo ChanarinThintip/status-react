@@ -47,7 +47,7 @@ let
   "\" --sysroot $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/${osId}-${osArch}/sysroot \
   -target ${androidTarget}${api} -v -Wl,-soname,libstatus.so\""
   else
-  "\"-isysroot $(xcrun --sdk ${iosSdk} --show-sdk-path) -miphonesimulator-version-min=7.0 -fembed-bitcode -arch ${iosArch}\"";
+  "\"--sysroot $(xcrun --sdk ${iosSdk} --show-sdk-path) -miphonesimulator-version-min=7.0 -fembed-bitcode -arch ${iosArch}\"";
 
   buildMode = if platform == "ios" then "c-archive" else "c-shared";
   libraryFileName = if platform == "ios" then "./libstatus.a" else "./libstatus.so";

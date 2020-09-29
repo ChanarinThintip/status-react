@@ -1,4 +1,5 @@
 { newScope, meta, source, shared
+, xcodeWrapper
 , stdenv
 , lib }:
 let
@@ -30,6 +31,17 @@ in rec {
       ln -s ${android.x86} $out/${getAttr "386" androidAbiMap}
       ln -s ${android.arm} $out/${getAttr "arm" androidAbiMap}
       ln -s ${android.arm64} $out/${getAttr "arm64" androidAbiMap}
+    '';
+  };
+
+  ios-all = stdenv.mkDerivation {
+    name = "status-go.nim-status.ios-all";
+    phases = [ "symlinkPhase" ];
+    inherit xcodeWrapper;
+    symlinkPhase = ''
+      mkdir -p $out
+      export PATH=${xcodeWrapper}/bin:$PATH 
+      lipo -create ${ios.x86}/libnim_status.a ${ios.arm64}/libnim_status.a -output $out/libnim_status.a
     '';
   };
 }
