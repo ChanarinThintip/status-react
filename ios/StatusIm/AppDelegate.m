@@ -171,5 +171,12 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
 {
  [RNCPushNotificationIOS didReceiveLocalNotification:notification];
 }
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center willPresentNotification:(UNNotification *)notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions options))completionHandler{
 
+    NSDictionary *userInfo = notification.request.content.userInfo;
+
+   [RNCPushNotificationIOS didReceiveRemoteNotification:userInfo
+   fetchCompletionHandler:^void (UIBackgroundFetchResult result){}];
+   completionHandler(UNNotificationPresentationOptionAlert);
+}
 @end
