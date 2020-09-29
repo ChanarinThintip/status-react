@@ -14,6 +14,8 @@ let
   ios = callPackage ./ios {
     inherit fastlane;
     status-go = status-go.mobile.ios;
+    status-go-shared = status-go.shared.ios-all;
+    status-go-nim-status = status-go.nim-status.ios-all;
   };
 
   selectedSources = [

@@ -887,7 +887,6 @@
 					"$(SRCROOT)/../node_modules/react-native-config/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-webview/ios",
 					"$(SRCROOT)/../node_modules/react-native/Libraries/LinkingIOS",
-					"$(SRCROOT)/../../nim-status/build",
 				);
 				INFOPLIST_FILE = StatusIm/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
@@ -895,7 +894,6 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
-					"$(SRCROOT)/../../nim-status/build",
 				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -951,7 +949,6 @@
 					"$(SRCROOT)/../node_modules/react-native-splash-screen/ios",
 					"$(SRCROOT)/../node_modules/react-native-config/ios/**",
 					"$(SRCROOT)/../node_modules/react-native/Libraries/LinkingIOS",
-					"$(SRCROOT)/../../nim-status/build",
 				);
 				INFOPLIST_FILE = StatusIm/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
@@ -959,7 +956,6 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
-					"$(SRCROOT)/../../nim-status/build",
 				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -1020,7 +1016,6 @@
 					"$(SRCROOT)/../node_modules/react-native-config/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-webview/ios",
 					"$(SRCROOT)/../node_modules/react-native/Libraries/LinkingIOS",
-					"$(SRCROOT)/../../nim-status/build",
 				);
 				INFOPLIST_FILE = StatusImPR/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
@@ -1028,7 +1023,6 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
-					"$(SRCROOT)/../../nim-status/build",
 				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -1083,7 +1077,6 @@
 					"$(SRCROOT)/../node_modules/react-native-splash-screen/ios",
 					"$(SRCROOT)/../node_modules/react-native-config/ios/**",
 					"$(SRCROOT)/../node_modules/react-native/Libraries/LinkingIOS",
-					"$(SRCROOT)/../../nim-status/build",
 				);
 				INFOPLIST_FILE = StatusImPR/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
@@ -1091,7 +1084,6 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
-					"$(SRCROOT)/../../nim-status/build",
 				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -1182,7 +1174,7 @@
 					"\"$(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)\"",
 					"\"$(TOOLCHAIN_DIR)/usr/lib/swift-5.0/$(PLATFORM_NAME)\"",
 					"\"$(inherited)\"",
-					"$(SRCROOT)/../../nim-status/build",
+					"$(SRCROOT)/../modules/react-native-status/ios/RCTStatus",
 				);
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -1254,7 +1246,7 @@
 					"\"$(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)\"",
 					"\"$(TOOLCHAIN_DIR)/usr/lib/swift-5.0/$(PLATFORM_NAME)\"",
 					"\"$(inherited)\"",
-					"$(SRCROOT)/../../nim-status/build",
+					"$(SRCROOT)/../modules/react-native-status/ios/RCTStatus",
 				);
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;

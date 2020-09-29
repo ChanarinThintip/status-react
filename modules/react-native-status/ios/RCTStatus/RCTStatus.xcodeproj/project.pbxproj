@@ -253,13 +253,11 @@
 					"$(SRCROOT)/../../../../ios/Pods/Headers/Public/React-Core",
 					"$(SRCROOT)/../../../../node_modules/react-native/React/**",
 					"$(SRCROOT)/../../../../node_modules/react-native-config/ios/ReactNativeConfig",
-					"$(SRCROOT)/../../../../../nim-status/build",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
-					"$(SRCROOT)/../../../../../nim-status/build",
 				);
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
@@ -289,13 +287,11 @@
 					"$(SRCROOT)/../../../../ios/Pods/Headers/Public/React-Core",
 					"$(SRCROOT)/../../../../node_modules/react-native/React/**",
 					"$(SRCROOT)/../../../../node_modules/react-native-config/ios/ReactNativeConfig",
-					"$(SRCROOT)/../../../../../nim-status/build",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
-					"$(SRCROOT)/../../../../../nim-status/build",
 				);
         ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = (

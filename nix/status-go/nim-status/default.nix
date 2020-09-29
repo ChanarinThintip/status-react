@@ -42,6 +42,7 @@ in rec {
       mkdir -p $out
       export PATH=${xcodeWrapper}/bin:$PATH 
       lipo -create ${ios.x86}/libnim_status.a ${ios.arm64}/libnim_status.a -output $out/libnim_status.a
+      cp -r ${ios.arm64}/*.h $out
     '';
   };
 }

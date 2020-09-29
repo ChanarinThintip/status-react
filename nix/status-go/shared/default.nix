@@ -44,6 +44,7 @@ in rec {
       mkdir -p $out
       export PATH=${xcodeWrapper}/bin:$PATH 
       lipo -create ${ios.x86}/libstatus.a ${ios.arm64}/libstatus.a -output $out/libstatus.a
+      cp -r ${ios.arm64}/*.h $out
     '';
   };
 
