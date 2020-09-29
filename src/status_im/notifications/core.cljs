@@ -4,6 +4,7 @@
             [status-im.utils.fx :as fx]
             [status-im.multiaccounts.update.core :as multiaccounts.update]
             ["@react-native-community/push-notification-ios" :default pn-ios]
+            [status-im.notifications.android :as pn-android]
             [status-im.native-module.core :as status]
             [quo.platform :as platform]
             [status-im.utils.config :as config]
@@ -64,7 +65,10 @@
  ::enable
  (fn [_]
    (if platform/android?
-     (status/enable-notifications)
+     (do
+       (pn-android/create-channel {:channel-id   "status-im-notifications"
+                                   :channel-name "Status push notifications"})
+       (status/enable-notifications))
      (enable-ios-notifications))))
 
 (re-frame/reg-fx

@@ -4,6 +4,7 @@
             [status-im.utils.fx :as fx]
             [status-im.ethereum.decode :as decode]
             ["@react-native-community/push-notification-ios" :default pn-ios]
+            [status-im.notifications.android :as pn-android]
             [status-im.ethereum.tokens :as tokens]
             [status-im.utils.utils :as utils]
             [status-im.utils.types :as types]
@@ -12,14 +13,19 @@
             [quo.platform :as platform]
             [re-frame.core :as re-frame]))
 
-(defn local-push-ios [{:keys [title description]}]
-  (.presentLocalNotification pn-ios #js {:alertBody  description
-                                         :alertTitle title}))
-
 (def default-erc20-token
   {:symbol   :ERC20
    :decimals 18
    :name     "ERC20"})
+
+(defn local-push-ios [{:keys [title message]}]
+  (.presentLocalNotification pn-ios #js {:alertBody  message
+                                         :alertTitle title}))
+
+(defn local-push-android [{:keys [title message]}]
+  (pn-android/present-local-notification {:channelId "status-im-notifications"
+                                          :title     title
+                                          :message   message}))
 
 (defn create-notification [{{:keys [state from to value erc20 chain contract]
                              :or   {chain "ropsten"}} :body}]
@@ -50,8 +56,8 @@
                                                                                :currency (:symbol token)
                                                                                :to       to})
                        nil)]
-    {:title       title
-     :description description}))
+    {:title   title
+     :message description}))
 
 (re-frame/reg-fx
  ::local-push-ios
@@ -70,7 +76,7 @@
        (fn [on-success on-error]
          (try
            (when (= "local-notifications" (:type evt))
-             (create-notification evt))
+             (-> (:event evt) create-notification local-push-android))
            (on-success)
            (catch :default e
              (log/warn "failed to handle background notification" e)

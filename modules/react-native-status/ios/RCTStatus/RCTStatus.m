@@ -750,7 +750,8 @@ RCT_EXPORT_METHOD(stopWallet) {
 RCT_EXPORT_METHOD(startWallet) {
 #if DEBUG
     NSLog(@"StartWallet() method called");
-#endif
+                                #endif
+    StatusgoStartLocalNotifications();
     StatusgoStartWallet();
 }
 
