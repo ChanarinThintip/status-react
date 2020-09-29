@@ -911,10 +911,11 @@
    (apply dissoc
           (-> users
               (merge contacts)
-              (assoc public-key {:alias      name
-                                 :name       (or preferred-name name)
-                                 :identicon  photo-path
-                                 :public-key public-key}))
+              (assoc public-key (mentions/add-searchable-phrases
+                                 {:alias      name
+                                  :name       (or preferred-name name)
+                                  :identicon  photo-path
+                                  :public-key public-key})))
           blocked)))
 
 (re-frame/reg-sub
