@@ -11,7 +11,8 @@
             [status-im.utils.money :as money]
             [status-im.i18n :as i18n]
             [quo.platform :as platform]
-            [re-frame.core :as re-frame]))
+            [re-frame.core :as re-frame]
+            [status-im.ui.components.react :as react]))
 
 (def default-erc20-token
   {:symbol   :ERC20
@@ -22,10 +23,12 @@
   (.presentLocalNotification pn-ios #js {:alertBody  message
                                          :alertTitle title}))
 
-(defn local-push-android [{:keys [title message]}]
-  (pn-android/present-local-notification {:channelId "status-im-notifications"
-                                          :title     title
-                                          :message   message}))
+(defn local-push-android [{:keys [title message icon]}]
+  (pn-android/present-local-notification (merge {:channelId "status-im-notifications"
+                                                 :title     title
+                                                 :message   message}
+                                                (when icon
+                                                  {:largeIconUrl (:uri (react/resolve-asset-source icon))}))))
 
 (defn create-notification [{{:keys [state from to value erc20 chain contract]
                              :or   {chain "ropsten"}} :body}]
@@ -33,7 +36,7 @@
                        (get-in tokens/all-tokens-normalized [(keyword chain)
                                                              (cstr/lower-case contract)]
                                default-erc20-token)
-                       {:symbol :ETH})
+                       (tokens/native-currency (keyword chain)))
         amount       (money/wei->ether (decode/uint value))
         account-to   @(re-frame/subscribe [:account-by-address to])
         account-from @(re-frame/subscribe [:account-by-address from])
@@ -57,6 +60,7 @@
                                                                                :to       to})
                        nil)]
     {:title   title
+     :icon    (get-in token [:icon :source])
      :message description}))
 
 (re-frame/reg-fx

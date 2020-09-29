@@ -85,10 +85,17 @@ public class PushNotificationHelper {
     }
 
     public void sendToNotificationCentre(final Bundle bundle) {
-        // FIXME:
-        Bitmap largeIconBitmap = null;
-        Bitmap bigPictureBitmap = null;
+        PushNotificationPicturesAggregator aggregator = new PushNotificationPicturesAggregator(new PushNotificationPicturesAggregator.Callback() {
+                public void call(Bitmap largeIconImage, Bitmap bigPictureImage) {
+                    sendToNotificationCentreWithPicture(bundle, largeIconImage, bigPictureImage);
+                }
+            });
 
+        aggregator.setLargeIconUrl(context, bundle.getString("largeIconUrl"));
+        aggregator.setBigPictureUrl(context, bundle.getString("bigPictureUrl"));
+    }
+
+    public void sendToNotificationCentreWithPicture(final Bundle bundle, Bitmap largeIconBitmap, Bitmap bigPictureBitmap) {
         try {
             Class intentClass = getMainActivityClass();
             if (intentClass == null) {
@@ -214,7 +221,7 @@ public class PushNotificationHelper {
             if (smallIcon != null && !smallIcon.isEmpty()) {
               smallIconResId = res.getIdentifier(smallIcon, "mipmap", packageName);
             } else if(smallIcon == null) {
-              smallIconResId = res.getIdentifier("ic_notification", "mipmap", packageName);
+              smallIconResId = res.getIdentifier("ic_stat_notify_status", "drawable", packageName);
             }
 
             if (smallIconResId == 0) {
