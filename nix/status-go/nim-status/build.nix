@@ -45,11 +45,17 @@ let
     "arm64" = "arm64";
   };
 
+  iosArchMap = {
+    "386" = "x86_64";
+    "arm" = "armv7";
+    "arm64" = "arm64";
+  };
+
   nimCpu = if platform == "ios" && arch == "386"
     then "--cpu:amd64" else "--cpu:${getAttr arch nimCpuMap} ";
   nimPlatform = "--os:${(if platform == "ios" then "ios" else "android")} ";
   iosSdk = if arch == "386" then "iphonesimulator" else "iphoneos";
-  iosArch = if arch == "386" then "x86_64" else "arm64";
+  iosArch = getAttr arch iosArchMap;
 
   compilerFlags = "switch(\"passC\", \""  +(concatStringsSep " " 
   (if platform == "android" || platform == "androideabi"then
